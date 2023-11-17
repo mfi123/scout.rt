@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ export interface TileClickEvent<T = TileGrid> extends Event<T> {
 export interface TileGridEventMap extends WidgetEventMap {
   'tileAction': TileActionEvent;
   'tileClick': TileClickEvent;
+  'layoutDone': Event;
   'layoutAnimationDone': Event;
   'propertyChange:empty': PropertyChangeEvent<boolean>;
   'propertyChange:filteredTiles': PropertyChangeEvent<Tile[]>;

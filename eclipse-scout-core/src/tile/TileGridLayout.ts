@@ -101,6 +101,7 @@ export class TileGridLayout extends LogicalGridLayout {
       arrays.pushAll(this.tiles, newTiles);
       this._layout($container);
     }
+    this.widget.trigger('layoutDone');
 
     let promises = [];
     if (animated) {
@@ -264,6 +265,7 @@ export class TileGridLayout extends LogicalGridLayout {
 
     let promises = [];
     tile.$container
+      .addClass('moving')
       .cssLeftAnimated(fromBounds.x, bounds.x, {
         start: promise => {
           promises.push(promise);
@@ -289,7 +291,9 @@ export class TileGridLayout extends LogicalGridLayout {
         queue: false
       });
 
-    return $.promiseAll(promises).then(restoreOverflowStyle);
+    return $.promiseAll(promises).then(restoreOverflowStyle).then(() => {
+      $(elem).removeClass('moving');
+    });
   }
 
   protected _updateScrollbar() {

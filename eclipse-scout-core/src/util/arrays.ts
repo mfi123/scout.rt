@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -609,5 +609,12 @@ export const arrays = {
       return array.splice(0, array.length);
     }
     return [];
+  },
+
+  swap<T>(array: T[], element1: T, element2: T) {
+    let index1 = array.indexOf(element1);
+    let index2 = array.indexOf(element2);
+    array[index1] = element2;
+    array[index2] = element1;
   }
 };
