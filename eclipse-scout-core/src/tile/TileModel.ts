@@ -47,4 +47,10 @@ export interface TileModel extends WidgetModel {
    * Default is false.
    */
   movable?: boolean;
+  /**
+   * Specifies whether the tile can be resized using drag & drop.
+   *
+   * Default is false.
+   */
+  resizable?: boolean;
 }
