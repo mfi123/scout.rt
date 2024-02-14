@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {Form, FormFieldModel, ObjectOrChildModel} from '../../../index';
+import {Form, FormFieldModel, GroupBoxMenuBarPosition, ObjectOrChildModel} from '../../../index';
 
 export interface WrappedFormFieldModel extends FormFieldModel {
   innerForm?: ObjectOrChildModel<Form>;
@@ -16,4 +16,9 @@ export interface WrappedFormFieldModel extends FormFieldModel {
    * Default is false.
    */
   initialFocusEnabled?: boolean;
+
+  /**
+   * Position of the menu bar of the root group box of the wrapped form
+   */
+  menuBarPosition?: GroupBoxMenuBarPosition;
 }

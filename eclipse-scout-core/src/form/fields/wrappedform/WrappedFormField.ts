@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {Event, EventHandler, Form, FormField, GroupBox, InitModelOf, ObjectOrChildModel, WrappedFormFieldEventMap, WrappedFormFieldModel} from '../../../index';
+import {Event, EventHandler, Form, FormField, GroupBox, InitModelOf, MenuBarPosition, ObjectOrChildModel, WrappedFormFieldEventMap, WrappedFormFieldModel} from '../../../index';
 
 export class WrappedFormField extends FormField implements WrappedFormFieldModel {
   declare model: WrappedFormFieldModel;
@@ -16,6 +16,7 @@ export class WrappedFormField extends FormField implements WrappedFormFieldModel
 
   innerForm: Form;
   initialFocusEnabled: boolean;
+  menuBarPosition: MenuBarPosition;
 
   protected _formDestroyHandler: EventHandler<Event<Form>>;
 
@@ -24,6 +25,7 @@ export class WrappedFormField extends FormField implements WrappedFormFieldModel
     this._addWidgetProperties(['innerForm']);
     this.innerForm = null;
     this.initialFocusEnabled = false;
+    this.menuBarPosition = GroupBox.MenuBarPosition.BOTTOM;
     this._formDestroyHandler = this._onInnerFormDestroy.bind(this);
   }
 
@@ -70,7 +72,7 @@ export class WrappedFormField extends FormField implements WrappedFormFieldModel
     this.innerForm.setClosable(false); // Disable close key stroke
     this.innerForm.renderInitialFocusEnabled = this.initialFocusEnabled; // do not render initial focus of form if disabled.
     if (this.innerForm.rootGroupBox) {
-      this.innerForm.rootGroupBox.setMenuBarPosition(GroupBox.MenuBarPosition.BOTTOM);
+      this.innerForm.rootGroupBox.setMenuBarPosition(this.menuBarPosition);
     }
 
     this.innerForm.render();
