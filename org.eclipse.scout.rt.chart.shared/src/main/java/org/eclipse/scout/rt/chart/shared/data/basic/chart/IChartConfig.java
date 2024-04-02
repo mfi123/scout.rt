@@ -58,6 +58,7 @@ public interface IChartConfig extends Serializable {
 
   String BUBBLE_SIZE_OF_LARGEST_BUBBLE = "options.bubble.sizeOfLargestBubble";
   String BUBBLE_MIN_BUBBLE_SIZE = "options.bubble.minBubbleSize";
+  String LEGEND_LABELS_BOX_WIDTH = "options.plugins.legend.labels.boxWidth";
 
   IChartConfig copy();
 
