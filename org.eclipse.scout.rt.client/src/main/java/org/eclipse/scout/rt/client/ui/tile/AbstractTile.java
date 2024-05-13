@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,8 @@
  */
 package org.eclipse.scout.rt.client.ui.tile;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import org.eclipse.scout.rt.client.context.ClientRunContexts;
@@ -34,8 +36,8 @@ import org.eclipse.scout.rt.platform.classid.ClassId;
 import org.eclipse.scout.rt.platform.context.RunMonitor;
 import org.eclipse.scout.rt.platform.exception.PlatformException;
 import org.eclipse.scout.rt.platform.exception.VetoException;
+import org.eclipse.scout.rt.platform.job.IFuture;
 import org.eclipse.scout.rt.platform.reflect.ConfigurationUtility;
-import org.eclipse.scout.rt.platform.util.Assertions;
 import org.eclipse.scout.rt.platform.util.concurrent.FutureCancelledError;
 import org.eclipse.scout.rt.platform.util.concurrent.ThreadInterruptedError;
 import org.eclipse.scout.rt.shared.data.colorscheme.ColorScheme;
@@ -57,6 +59,7 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
   private IDataChangeListener m_internalDataChangeListener;
   private boolean m_filterAccepted = true;
   private volatile boolean m_loaded = false;
+  private IFuture<Void> m_loadJob;
 
   public AbstractTile() {
     this(true);
@@ -114,6 +117,7 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
   @Override
   protected final void disposeInternal() {
     disposeTileInternal();
+    cancelLoading();
     interceptDisposeTile();
     super.disposeInternal();
   }
@@ -385,6 +389,32 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
     }
   }
 
+  @Override
+  public void cancelLoading() {
+    if (m_loadJob != null) {
+      m_loadJob.cancel(true);
+    }
+  }
+
+  @Override
+  public void reloadData() {
+    if (!isLoading()) {
+      loadData();
+      return;
+    }
+    cancelLoading();
+    addPropertyChangeListener(new PropertyChangeListener() {
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        if (ITile.PROP_LOADING.equals(evt.getPropertyName()) && !isLoading()) {
+          removePropertyChangeListener(this);
+          // Call reload (not load) in case another job has been started in the meantime and needs to be canceled first
+          reloadData();
+        }
+      }
+    });
+  }
+
   protected void beforeLoadData() {
     // NOP
   }
@@ -465,7 +495,7 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
       try {
         ITileGrid tileGridParent = getParentOfType(ITileGrid.class);
         IForm formParent = getParentOfType(IForm.class);
-        BEANS.get(TileDataLoadManager.class).schedule(() -> {
+        m_loadJob = BEANS.get(TileDataLoadManager.class).schedule(() -> {
           try {
             final DATA data = doLoadData();
             BEANS.get(TileDataLoadManager.class).runInModelJob(() -> {

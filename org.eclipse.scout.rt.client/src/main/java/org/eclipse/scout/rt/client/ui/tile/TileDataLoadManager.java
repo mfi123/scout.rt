@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -63,8 +63,8 @@ public class TileDataLoadManager {
         });
   }
 
-  public void schedule(IRunnable runnable, JobInput jobInput) {
-    Jobs.schedule(runnable, jobInput
+  public IFuture<Void> schedule(IRunnable runnable, JobInput jobInput) {
+    return Jobs.schedule(runnable, jobInput
         .withExecutionSemaphore(m_tileExecutionSemaphore)
         .withExpirationTime(CONFIG.getPropertyValue(TileDataLoadQueueTimeoutSeconds.class), TimeUnit.SECONDS));
   }
@@ -78,7 +78,7 @@ public class TileDataLoadManager {
         .andMatch(new JobExcludeCurrentByIdentifierFilter(excludeJobName, windowIdentifier))
         .toFilter());
 
-    // mark futures we cancelled so the they can be filtered in the error listener above
+    // mark futures we cancelled, so they can be filtered in the error listener above
     for (IFuture<?> future : futures) {
       future.addExecutionHint(MANUAL_CANCELLATION_MARKER);
     }
