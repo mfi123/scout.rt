@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -56,4 +56,25 @@ public final class UserAgentUtility {
     }
   }
 
+  /**
+   * Simulates the usage of a certain device type by executing the given runnable in context of a user agent using the desired device type.
+   * E.g. if {@link UiDeviceType#MOBILE} is passed, {@link UserAgentUtility#isMobileDevice()} will return true inside the runnable even if the user is using a desktop device.
+   * <p>
+   * If no device type is passed, the runnable will be executed with the current user agent.
+   */
+  public static void runAs(UiDeviceType deviceType, Runnable runnable) {
+    if (deviceType == null) {
+      runnable.run();
+      return;
+    }
+
+    UserAgent originalUserAgent = UserAgent.get();
+    try {
+      UserAgent.set(UserAgents.create(originalUserAgent).withUiDeviceType(deviceType).build());
+      runnable.run();
+    }
+    finally {
+      UserAgent.set(originalUserAgent);
+    }
+  }
 }
