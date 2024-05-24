@@ -54,7 +54,7 @@ export class TileGridMoveSupport extends MoveSupport<Tile> {
     this.widget.setTiles(newElements);
 
     // Update element infos right after layout is done but BEFORE animation starts to get the final position of the tiles
-    let def = $.Deferred();
+    let deferred = $.Deferred();
     // Wait for layout to get correct target dimensions (grid cells may have changed size and position)
     // Cannot use 'when' because the promise would resolve while the bounds animation is already running
     this.widget.one('layoutDone', () => {
@@ -66,7 +66,7 @@ export class TileGridMoveSupport extends MoveSupport<Tile> {
       let targetBounds = graphics.offsetBounds(draggedTile.$container);
       if (targetBounds.dimension().equals(this._moveData.draggedElementInfo.bounds.dimension())) {
         // If size does not change, there is no need to replace the clone
-        def.resolve(targetBounds);
+        deferred.resolve(targetBounds);
         return;
       }
 
@@ -88,15 +88,19 @@ export class TileGridMoveSupport extends MoveSupport<Tile> {
       // Enable transition again to animate the resizing to the target size
       requestAnimationFrame(() => {
         this._moveData.$clone.css('--animation-duration-factor', this._animationDurationFactor);
-        def.resolve(targetBounds);
+        deferred.resolve(targetBounds);
       });
     });
-    return def.promise();
+    return deferred.promise();
   }
 
   protected override _restoreStyles() {
-    this._moveData.$draggedElement.removeClass('moved');
     super._restoreStyles();
+    let $draggedElement = this._moveData.$draggedElement;
+    $draggedElement.addClass('drag-done');
+    setTimeout(() => {
+      $draggedElement.removeClass('drag-done');
+    }, 100);
   }
 }
 

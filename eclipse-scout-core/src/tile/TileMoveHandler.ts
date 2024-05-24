@@ -10,13 +10,13 @@
 import {InitModelOf, ObjectModel, ObjectWithType, scout, SomeRequired, Tile, TileGrid, TileGridMoveSupport} from '..';
 import $ from 'jquery';
 
-export class TileMoveHandler implements TileMovableModel, ObjectWithType {
-  declare model: TileMovableModel;
+export class TileMoveHandler implements TileMoveHandlerModel, ObjectWithType {
+  declare model: TileMoveHandlerModel;
   declare initModel: SomeRequired<this['model'], '$container'>;
   objectType: string;
   tileGrid: TileGrid;
-  moveSupport: TileGridMoveSupport;
   $container: JQuery;
+  moveSupport: TileGridMoveSupport;
 
   protected _mouseDownHandler: (event: JQuery.MouseDownEvent) => void;
 
@@ -55,7 +55,7 @@ export class TileMoveHandler implements TileMovableModel, ObjectWithType {
   }
 }
 
-export interface TileMovableModel extends ObjectModel<TileMoveHandler> {
+export interface TileMoveHandlerModel extends ObjectModel<TileMoveHandler> {
   $container?: JQuery;
   tileGrid: TileGrid;
 }

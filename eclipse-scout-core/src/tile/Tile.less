@@ -45,6 +45,18 @@
   &.dragover {
     filter: brightness(0.8);
   }
+
+  &.dragged.releasing {
+    // Remove opacity transition added by releasing class in MoveSupport.less to make dragged tile invisible immediately while the clone will be moved to the target position.
+    transition: none;
+  }
+
+  // The class is added when dragging is finished and original state restored right before dragged and releasing classes are removed.
+  // The class will be removed about 100ms later and is used to disable the opacity transition added by TileGrid.less.
+  // This ensures the dragged element does not flicker when shown again.
+  &.drag-done {
+    transition: none !important;
+  }
 }
 
 /* The default class is added if displayStyle is set to DEFAULT. If it is set to PLAIN no class will be added. */

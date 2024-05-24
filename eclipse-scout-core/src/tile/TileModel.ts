@@ -34,15 +34,19 @@ export interface TileModel extends WidgetModel {
    */
   gridDataHints?: ObjectOrModel<GridData>;
   /**
-   * Specifies, whether the tile is selected. Default is false.
+   * Specifies, whether the tile is selected
+   *
+   * Default is false.
    */
   selected?: boolean;
   /**
-   * Specifies, whether the tile can be selected. Default is false.
+   * Specifies, whether the tile can be selected.
+   *
+   * Default is false.
    */
   selectable?: boolean;
   /**
-   * Specifies whether the tile can be selected for moving.
+   * Specifies whether the tile can be moved using drag & drop.
    *
    * Default is false.
    */

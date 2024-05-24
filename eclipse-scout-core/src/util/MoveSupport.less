@@ -12,17 +12,19 @@
 
   .move-support() {
 
+    // Is added to the dragged element when the element is grabbed and will be removed when the move operation is finished.
     &.dragged {
       z-index: -1; // draw behind all other elements (during animation)
       border: 0 !important; // remove border (if there is one) while dragging so the overlay covers the whole element
 
+      // Is added when the clone is released and about to be moved to its target position.
       &.releasing {
+        // Hide dragged element while clone will be moved to the new position
         opacity: 0;
+        // Smoothly hide dragged element
+        // Transition may have to be deactivated if dragged element is not yet at the correct position
+        // (depending on the implementation, the element may be moved to the target position while dragging or at the end after releasing)
         transition: opacity 500ms;
-
-        &.moved {
-          transition: none;
-        }
       }
 
       // Overlay over currently dragged element
@@ -38,21 +40,10 @@
         border: 2px dashed @move-support-drag-placeholder-border-color;
         z-index: 2; // draw over elements inside the tile having a z-index
       }
-
-      & .scroll-shadow {
-        // Scroll shadow would be drawn over after element -> hide it
-        --scroll-shadow-size: transparent !important;
-        transition: none;
-      }
     }
 
-    // done class is added when dragging is finished and original state restored right before dragged and dragged-end classes are removed
-    // the class will be removed about 50ms later and is used to disable the opacity transition. This ensures the dragged element does not flicker when shown again.
-    &.drag-done {
-      transition: none !important;
-    }
-
-    &.clone.dragging {
+    // When an element is dragged, a clone of the dragged element is created
+    &.dragged-clone {
       --dragging-scale: 1;
       --animation-duration-factor: 1;
       transform: scale(var(--dragging-scale));
@@ -61,6 +52,7 @@
       opacity: 0.7;
       z-index: 2; // draw over scrollbars
 
+      // Is added when the clone is released and about to be moved to its target position.
       &.releasing {
         opacity: 1;
       }

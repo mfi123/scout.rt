@@ -172,13 +172,7 @@ export class MoveSupport<TElem extends Widget> extends EventEmitter {
     this._moveData.$clone && this._moveData.$clone.remove();
 
     // A done class makes it possible to disable transitions that must not be active while the clone will be swapped with the dragged element
-    let $draggedElement = this._moveData.$draggedElement;
-    $draggedElement.addClass('drag-done');
-    setTimeout(() => {
-      $draggedElement.removeClass('drag-done');
-    }, 100);
     this._moveData.$draggedElement.removeClass('dragged releasing');
-
     this._moveData.$container.removeClass('dragging-element');
   }
 
@@ -264,7 +258,7 @@ export class MoveSupport<TElem extends Widget> extends EventEmitter {
 
   protected _append$Clone() {
     let $clone = this._moveData.$draggedElement.clone()
-      .addClass('dragging clone')
+      .addClass('dragged-clone')
       .removeAttr('data-id')
       .css('position', 'fixed')
       .appendTo(this._moveData.session.$entryPoint);

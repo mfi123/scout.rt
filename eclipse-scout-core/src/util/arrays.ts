@@ -670,10 +670,19 @@ export const arrays = {
     return [];
   },
 
+  /**
+   * Swaps the two elements in the array.
+   * Does nothing if array is null or undefined or one of the element is not part of the array.
+   */
   swap<T>(array: T[], element1: T, element2: T) {
+    if (!array) {
+      return;
+    }
     let index1 = array.indexOf(element1);
     let index2 = array.indexOf(element2);
-    array[index1] = element2;
-    array[index2] = element1;
+    if (index1 > -1 && index2 > -1) {
+      array[index1] = element2;
+      array[index2] = element1;
+    }
   }
 };
