@@ -114,7 +114,7 @@ export const JasmineScoutUtil = {
    * The mock is called asynchronously using setTimeout to let the runtime code add any required event listeners first.
    *
    * The mock may return an object with [id, widget] if the action is supposed to create widgets.
-   * The id contains the action id and the id for the widget used in the hybrid action (`${actionId}${widgetId}`).
+   * The id needs to contain the action id and the id for the widget used in the hybrid action (`${actionId}${widgetId}`).
    */
   mockHybridAction<TData extends DoEntity>(session: Session, actionType: string, mock: (event: HybridActionEvent<TData>) => Record<string, Widget>) {
     let hm = HybridManager.get(session);
