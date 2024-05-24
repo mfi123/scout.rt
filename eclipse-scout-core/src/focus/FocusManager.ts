@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -445,10 +445,11 @@ export class FocusManager implements FocusManagerOptions {
       return true;
     }
 
-    // Don't prevent default action for draggable elements which is dragstart event
+    // Allow dragstart event for draggable elements
     if (focusUtils.isDraggable($element)) {
-      // Unfortunately, preventDefault will not only prevent dragstart but also focus gain
-      // If the draggable element is not focusable, we need to restore the focus later otherwise the desktop would be focused
+      // PreventDefault() would not only prevent focus gain but also the dragstart event, so we need to return true to allow the dragstart event.
+      // But now the browser tries to focus an element and since the draggable element is not focusable (otherwise it would have returned above), the desktop is likely to be focused.
+      // Because we can't prevent dragstart and allow focus, we need to re-focus the currently focused element later.
       focusUtils.restoreFocusLater(this.session.$entryPoint);
       return true;
     }
