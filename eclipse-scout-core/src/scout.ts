@@ -465,6 +465,10 @@ export const scout = {
     return clone;
   },
 
+  /**
+   * Enables or disables the layout spy that visualizes the cell bounds of the logical grid for debugging purposes.
+   * The spy can be enabled on elements that belong to a widget using a {@link LogicalGridLayout}, e.g. {@link GroupBox}, {@link TileGrid}, etc.
+   */
   setLogicalGridSpyEnabled(elem: HTMLElement, enabled: boolean) {
     let layout;
     let widget = scout.widget(elem);

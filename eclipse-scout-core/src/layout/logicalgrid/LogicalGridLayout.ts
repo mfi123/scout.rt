@@ -34,8 +34,8 @@ export class LogicalGridLayout extends AbstractLayout {
   columnWidth: number;
   rowHeight: number;
   minWidth: number;
-  spy: LogicalGridLayoutSpy;
   spyEnabled: boolean;
+  protected _spy: LogicalGridLayoutSpy;
 
   constructor(widget: Widget, layoutConfig: ObjectOrModel<LogicalGridLayoutConfig>) {
     super();
@@ -132,7 +132,7 @@ export class LogicalGridLayout extends AbstractLayout {
     }
     $.log.isTraceEnabled() && $.log.trace('(LogicalGridLayout#layout) container ' + htmlContainer.debug() + ' size=' + containerSize + ' insets=' + containerInsets);
     let cellBounds = this._layoutCellBounds(containerSize, containerInsets);
-    this.spy?.drawCellBounds($container, cellBounds);
+    this._spy?.drawCellBounds($container, cellBounds);
 
     // Set bounds of components
     let r1, r2, r, d, $comp, i, htmlComp, data, delta, margins;
@@ -225,13 +225,19 @@ export class LogicalGridLayout extends AbstractLayout {
     return dim;
   }
 
+  /**
+   * Enables or disables the layout spy that visualizes the cell bounds of the logical grid for debugging purposes.
+   */
   setSpyEnabled(spyEnabled: boolean) {
+    if (this.spyEnabled === spyEnabled) {
+      return;
+    }
     this.spyEnabled = spyEnabled;
     if (!this.spyEnabled) {
-      this.spy?.dispose();
-      this.spy = null;
+      this._spy?.dispose();
+      this._spy = null;
     } else {
-      this.spy = new LogicalGridLayoutSpy();
+      this._spy = new LogicalGridLayoutSpy();
     }
   }
 }
