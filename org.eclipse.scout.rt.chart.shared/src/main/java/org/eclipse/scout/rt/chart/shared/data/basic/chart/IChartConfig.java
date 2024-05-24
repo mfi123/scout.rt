@@ -44,6 +44,8 @@ public interface IChartConfig extends Serializable {
 
   int DEFAULT_MAX_SEGMENTS_PIE = 5;
 
+  String LEGEND_LABELS_BOX_WIDTH = "options.plugins.legend.labels.boxWidth";
+
   String SPEEDO_CHART_GREEN_AREA_POSITION = "options.speedo.greenAreaPosition";
 
   String SALESFUNNEL_NORMALIZED = "options.salesfunnel.normalized";
@@ -58,7 +60,6 @@ public interface IChartConfig extends Serializable {
 
   String BUBBLE_SIZE_OF_LARGEST_BUBBLE = "options.bubble.sizeOfLargestBubble";
   String BUBBLE_MIN_BUBBLE_SIZE = "options.bubble.minBubbleSize";
-  String LEGEND_LABELS_BOX_WIDTH = "options.plugins.legend.labels.boxWidth";
 
   IChartConfig copy();
 
