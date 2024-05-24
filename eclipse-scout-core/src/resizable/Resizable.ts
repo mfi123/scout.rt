@@ -325,7 +325,7 @@ export class Resizable implements ResizableModel, ObjectWithType {
     if (this._context.currentBounds.equals(this._context.initialBounds)) {
       return;
     }
-    this.$container.trigger('resizeend', {
+    this.$container.trigger('resizeEnd', {
       newBounds: this._context.currentBounds,
       initialBounds: this._context.initialBounds
     });
@@ -366,7 +366,7 @@ export interface ResizableContext {
   minBounds: Rectangle;
   maxBounds: Rectangle;
   distance: number[];
-  edge: string;
+  edge: 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'nw';
   mousedownEvent: MouseDownEvent;
 }
 

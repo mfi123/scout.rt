@@ -9,8 +9,8 @@
  */
 import {arrays, graphics, GridData, InitModelOf, LogicalGridLayout, Point, Predicate, Rectangle, Resizable, ResizableModel, scout, Tile, TileGrid, tileUtil} from '..';
 
-export class TileResizeHandler extends Resizable implements TileResizableModel {
-  declare model: TileResizableModel;
+export class TileResizeHandler extends Resizable implements TileResizeHandlerModel {
+  declare model: TileResizeHandlerModel;
   tileGrid: TileGrid;
   ignorer: (tile: Tile) => boolean;
 
@@ -46,28 +46,28 @@ export class TileResizeHandler extends Resizable implements TileResizableModel {
    * @returns the logical bounds for the new range
    */
   protected _computeLogicalBounds(newBounds: Rectangle): Rectangle {
-    let unionGridData;
+    let unionBounds;
     let layoutInfo = this.layout.info;
     for (let row = 0; row < layoutInfo.rows; row++) {
       for (let col = 0; col < layoutInfo.cols; col++) {
         let cellBounds = layoutInfo.cellBounds[row][col];
         if (newBounds.contains(cellBounds.point())) {
-          let gridData = new Rectangle(col, row, 1, 1);
-          if (!unionGridData) {
-            unionGridData = gridData;
+          let bounds = new Rectangle(col, row, 1, 1);
+          if (!unionBounds) {
+            unionBounds = bounds;
           } else {
-            unionGridData = unionGridData.union(gridData);
+            unionBounds = unionBounds.union(bounds);
           }
         }
       }
     }
-    return unionGridData;
+    return unionBounds;
   }
 
   /**
    * @returns the cell bounds for the cell that is on the other side of the dragged edge.
    */
-  protected _findInitialCell() {
+  protected _findInitialCell(): Rectangle {
     let tile = scout.widget(this.$container) as Tile;
     // Find the actual grid data object.
     // Compared to tile.gridData it may contain adjusted x/y values because of collapsed rows/cols
@@ -123,7 +123,6 @@ export class TileResizeHandler extends Resizable implements TileResizableModel {
   }
 
   protected override _resizeEnd() {
-    super._resizeEnd();
     let newBounds = this._context.currentBounds;
     if (newBounds.equals(this._context.initialBounds)) {
       return;
@@ -202,7 +201,13 @@ export class TileResizeHandler extends Resizable implements TileResizableModel {
   }
 }
 
-export interface TileResizableModel extends ResizableModel {
+export interface TileResizeHandlerModel extends ResizableModel {
   tileGrid: TileGrid;
+  /**
+   * A function that can return true for tiles that should be ignored when tiles are being moved down to make room for the resized tile.
+   * This is typically used for placeholder tiles.
+   *
+   * @see tileUtil.moveOtherTilesDown
+   */
   ignorer?: (tile: Tile) => boolean;
 }

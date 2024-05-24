@@ -324,13 +324,13 @@ export class TileGrid<TTile extends Tile = Tile> extends Widget implements TileG
     this.setTiles([]);
   }
 
-  moveTileBefore(tileToMove: ObjectOrModel<TTile>, sibling: TTile) {
-    let tiles = arrays.moveBefore(this._tiles, tileToMove as Tile, sibling);
+  moveTileBefore(tileToMove: TTile, sibling: TTile) {
+    let tiles = arrays.moveBefore(this._tiles, tileToMove, sibling);
     this._setTilesInternal(tiles);
   }
 
-  moveTileAfter(tileToMove: ObjectOrModel<TTile>, sibling: TTile) {
-    let tiles = arrays.moveAfter(this._tiles, tileToMove as Tile, sibling);
+  moveTileAfter(tileToMove: TTile, sibling: TTile) {
+    let tiles = arrays.moveAfter(this._tiles, tileToMove, sibling);
     this._setTilesInternal(tiles);
   }
 

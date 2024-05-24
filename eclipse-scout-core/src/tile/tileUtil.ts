@@ -36,7 +36,7 @@ export const tileUtil = {
       // If tiles use explicit x/y values work with hints because they are always set. GridData will only be set after layouting.
       let gridData = tile.gridDataHints;
       if (gridData.x < 0 || gridData.y < 0) {
-        // // Use gridData object instead if available
+        // Use gridData object instead if available
         gridData = tile.gridData;
         if (!gridData || gridData.x < 0 || gridData.y < 0) {
           continue;
@@ -64,6 +64,8 @@ export const tileUtil = {
    *
    * This only works for tiles with an explicit position which means it only works if gridDataHints.x and gridDataHints.y are greater than or equal to 0.
    * Tiles without an explicit position are ignored because they are arranged automatically by the logical grid.
+   *
+   * @param ignore If the function returns true the passed tile will be ignored and never be moved. This is typically used for placeholder tiles.
    */
   moveOtherTilesDown(tiles: Tile[], resizedTile: Tile, newGridData: GridData, ignore?: (tile: Tile) => boolean) {
     let matrix = tileUtil.buildMatrix(tiles);
