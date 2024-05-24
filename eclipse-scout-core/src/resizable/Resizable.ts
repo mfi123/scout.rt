@@ -222,9 +222,9 @@ export class Resizable implements ResizableModel, ObjectWithType {
     let minHeight = $resizable.cssMinHeight();
     let maxWidth = $resizable.cssMaxWidth();
     let maxHeight = $resizable.cssMaxHeight();
-    let initialBounds = graphics.bounds($resizable, {exact: true});
     let $offsetParent = $resizable.offsetParent();
-    initialBounds = initialBounds.translate(new Point($offsetParent[0].scrollLeft, $offsetParent[0].scrollTop));
+    let initialBounds = graphics.bounds($resizable, {exact: true})
+      .translate(new Point($offsetParent[0].scrollLeft, $offsetParent[0].scrollTop));
 
     this._context = {
       initialBounds: initialBounds,
