@@ -49,14 +49,14 @@ public class TileDataLoadManager {
     Jobs.getJobManager().addListener(Jobs.newEventFilterBuilder()
         .andMatchEventType(JobEventType.JOB_STATE_CHANGED)
         .andMatchState(JobState.DONE)
-        .andMatchName(ITileGrid.PROP_ASYNC_LOAD_JOBNAME_PREFIX)
+        .andMatchName(ITileGrid.ASYNC_LOAD_JOBNAME_PREFIX)
         .andMatchNotExecutionHint(MANUAL_CANCELLATION_MARKER)
         .toFilter(),
         event -> {
           if (event.getData().getFuture().isCancelled()) { // still needed, MANUAL_CANCELLATION_MARKER used to filter Jobs cancelled manually, Jobs cancelled e.g. when expired should be handled here
             final ClientRunContext runContext = (ClientRunContext) event.getData().getFuture().getJobInput().getRunContext();
             ModelJobs.schedule(() -> {
-              ITileLoadCancellable tileLoadCancellable = runContext.getProperty(ITileGrid.PROP_RUN_CONTEXT_TILE_LOAD_CANCELLABLE);
+              ITileLoadCancellable tileLoadCancellable = runContext.getProperty(ITileGrid.RUN_CONTEXT_TILE_LOAD_CANCELLABLE);
               tileLoadCancellable.onLoadDataCancel();
             }, ModelJobs.newInput(runContext.copy().withRunMonitor(BEANS.get(RunMonitor.class))).withName("handling of cancelled tile data load jobs"));
           }
@@ -109,9 +109,9 @@ public class TileDataLoadManager {
     public boolean test(final IFuture<?> future) {
       JobInput jobInput = future.getJobInput();
       return jobInput != null
-          && ObjectUtility.equals(future.getJobInput().getName(), ITileGrid.PROP_ASYNC_LOAD_JOBNAME_PREFIX)
-          && !jobInput.getExecutionHints().contains(ITileGrid.PROP_ASYNC_LOAD_IDENTIFIER_PREFIX + m_asyncLoadIdentifierName)
-          && jobInput.getExecutionHints().contains(ITileGrid.PROP_WINDOW_IDENTIFIER_PREFIX + m_windowIdentifier);
+          && ObjectUtility.equals(future.getJobInput().getName(), ITileGrid.ASYNC_LOAD_JOBNAME_PREFIX)
+          && !jobInput.getExecutionHints().contains(ITileGrid.ASYNC_LOAD_IDENTIFIER_PREFIX + m_asyncLoadIdentifierName)
+          && jobInput.getExecutionHints().contains(ITileGrid.WINDOW_IDENTIFIER_PREFIX + m_windowIdentifier);
     }
   }
 

@@ -59,7 +59,7 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
   private IDataChangeListener m_internalDataChangeListener;
   private boolean m_filterAccepted = true;
   private volatile boolean m_loaded = false;
-  private IFuture<Void> m_loadJob;
+  private IFuture<Void> m_loadJobFuture;
 
   public AbstractTile() {
     this(true);
@@ -311,6 +311,10 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
     m_loaded = loaded;
   }
 
+  protected IFuture<Void> getLoadJobFuture() {
+    return m_loadJobFuture;
+  }
+
   @Override
   public void registerDataChangeListener(Object... dataTypes) {
     if (m_internalDataChangeListener == null) {
@@ -391,8 +395,8 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
 
   @Override
   public void cancelLoading() {
-    if (m_loadJob != null) {
-      m_loadJob.cancel(true);
+    if (getLoadJobFuture() != null) {
+      getLoadJobFuture().cancel(true);
     }
   }
 
@@ -403,10 +407,10 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
       return;
     }
     cancelLoading();
-    addPropertyChangeListener(new PropertyChangeListener() {
+    addPropertyChangeListener(ITile.PROP_LOADING, new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (ITile.PROP_LOADING.equals(evt.getPropertyName()) && !isLoading()) {
+        if (!isLoading()) {
           removePropertyChangeListener(this);
           // Call reload (not load) in case another job has been started in the meantime and needs to be canceled first
           reloadData();
@@ -495,16 +499,18 @@ public abstract class AbstractTile extends AbstractWidget implements ITile {
       try {
         ITileGrid tileGridParent = getParentOfType(ITileGrid.class);
         IForm formParent = getParentOfType(IForm.class);
-        m_loadJob = BEANS.get(TileDataLoadManager.class).schedule(() -> {
+        m_loadJobFuture = BEANS.get(TileDataLoadManager.class).schedule(() -> {
           try {
             final DATA data = doLoadData();
             BEANS.get(TileDataLoadManager.class).runInModelJob(() -> {
+              m_loadJobFuture = null;
               setLoading(false);
               updateModelData(data);
             });
           }
           catch (final Throwable e) { // Catch Throwable so we can handle all AbstractInterruptionError accordingly
             BEANS.get(TileDataLoadManager.class).runInModelJob(() -> {
+              m_loadJobFuture = null; // Needs to be done before setLoading(false) because setLoading(false) may re-schedule another load job, see reloadData()
               setLoading(false);
               handleLoadDataException(e);
             });

@@ -58,7 +58,7 @@ public interface ITile extends IWidget, IOrdered, IStyleable, IExtensibleObject,
   void ensureDataLoaded();
 
   /**
-   * Loads the data using {@link ITileDataLoader}. Does nothing, if the data is already being loaded.
+   * Loads the data using {@link ITileDataLoader}. Does nothing if the data is already being loaded.
    */
   void loadData();
 
