@@ -219,7 +219,6 @@ export class LogicalGridLayoutInfo implements LogicalGridLayoutInfoModel {
     let fixedWidths = arrays.init(this.cols, false);
     for (let i = 0; i < compCount; i++) {
       let cons = this.gridDatas[i];
-
       if (cons.gridw === 1) {
         let prefw;
         if (cons.widthHint > 0) {
@@ -230,11 +229,12 @@ export class LogicalGridLayoutInfo implements LogicalGridLayoutInfoModel {
           prefw = this.logicalWidthInPixel(cons);
         }
         prefw = Math.floor(prefw);
-        for (let j = cons.gridx; j < cons.gridx + cons.gridw && j < this.cols; j++) {
-          prefWidths[j] = Math.max(prefWidths[j], prefw);
-          maxWidths[j] = Math.min(maxWidths[j], cons.maxWidth);
+        let x = cons.gridx;
+        if (x < this.cols) {
+          prefWidths[x] = Math.max(prefWidths[x], prefw);
+          maxWidths[x] = Math.min(maxWidths[x], cons.maxWidth);
           if (cons.weightx === 0) {
-            fixedWidths[j] = true;
+            fixedWidths[x] = true;
           }
         }
       }
@@ -244,27 +244,26 @@ export class LogicalGridLayoutInfo implements LogicalGridLayoutInfoModel {
       let cons = this.gridDatas[i];
       if (cons.gridw > 1) {
         let hSpan = cons.gridw;
-        let spanWidth = [0, 0, 0];
-        let distWidth = [0, 0, 0];
+        let spanWidth = 0;
+        let distWidth;
         for (let j = cons.gridx; j < cons.gridx + cons.gridw && j < this.cols; j++) {
           if (!fixedWidths[j]) {
-            spanWidth[lc.PREF] += prefWidths[j];
-            spanWidth[lc.MAX] += maxWidths[j];
+            spanWidth += prefWidths[j];
           }
         }
-        let hGaps = (hSpan - 1) * this.hgap;
         if (cons.widthHint > 0) {
-          distWidth[lc.PREF] = cons.widthHint - spanWidth[lc.PREF] - hGaps;
+          distWidth = cons.widthHint;
         } else if (cons.useUiWidth) {
-          distWidth[lc.PREF] = compSize[i].width - spanWidth[lc.PREF] - hGaps;
+          distWidth = compSize[i].width;
         } else {
-          distWidth[lc.PREF] = this.logicalWidthInPixel(cons) - spanWidth[lc.PREF] - hGaps;
+          distWidth = this.logicalWidthInPixel(cons);
         }
-        if (distWidth[lc.PREF] > 0) {
-          this._distributeWidth(cons, distWidth[lc.PREF], spanWidth[lc.PREF], prefWidths, fixedWidths, Math.max.bind(Math));
+        let hGaps = (hSpan - 1) * this.hgap;
+        distWidth -= hGaps;
+        if (distWidth > spanWidth) {
+          this._distributeWidth(cons, distWidth, prefWidths, fixedWidths, Math.max.bind(Math));
         }
-        distWidth[lc.MAX] = cons.maxWidth - spanWidth[lc.MAX] - hGaps;
-        this._distributeWidth(cons, distWidth[lc.MAX], spanWidth[lc.MAX], maxWidths, fixedWidths, Math.min.bind(Math));
+        this._distributeWidth(cons, cons.maxWidth - hGaps, maxWidths, fixedWidths, Math.min.bind(Math));
       }
     }
 
@@ -313,16 +312,15 @@ export class LogicalGridLayoutInfo implements LogicalGridLayoutInfoModel {
 
   /**
    * @param cons the current grid data
-   * @param distWidth the widths to distribute to the columns. The widgets are distributed to the columns equally.
-   * @param spanWidth the cumulated width of every cell of every row visited so far in the span range [grid.x, grid.x + grid.w]
+   * @param distWidth the width to distribute to the columns. The width is distributed to the columns equally.
    * @param widths the column widths that have been distributed so far when the previous rows were visited
    * @param fixedWidths the columns with a fixed width (weightx = 0)
-   * @param calc the function that decides whether to use the newly calculated column width or the existing one
+   * @param calc a function that is called for each element of the given `widths` array, e.g. to decide whether to use the newly calculated column width or the existing one.
    */
-  protected _distributeWidth<T>(cons: LogicalGridData, distWidth: number, spanWidth: number, widths: number[], fixedWidths: boolean[], calc: (equalWidth: number, width: number) => number) {
+  protected _distributeWidth(cons: LogicalGridData, distWidth: number, widths: number[], fixedWidths: boolean[], calc: (equalWidth: number, width: number) => number) {
     let hSpan = cons.gridw;
-    let equalWidth = Math.floor((distWidth + spanWidth) / hSpan);
-    let remainder = (distWidth + spanWidth) % hSpan;
+    let equalWidth = Math.floor(distWidth / hSpan);
+    let remainder = distWidth % hSpan;
     let last = -1;
     for (let j = cons.gridx; j < cons.gridx + cons.gridw && j < this.cols; j++) {
       last = j;
@@ -340,15 +338,15 @@ export class LogicalGridLayoutInfo implements LogicalGridLayoutInfoModel {
 
   /**
    * @param cons the current grid data
-   * @param distHeight the heights to distribute to the rows. The widgets are distributed to the rows equally.
-   * @param spanHeight the cumulated height of every cell of every column visited so far in the span range [grid.y, grid.y + grid.h]
+   * @param distHeight the height to distribute to the rows. The height is distributed to the rows equally.
    * @param widths the row heights that have been distributed so far when the previous column were visited
    * @param fixedHeights the rows with a fixed height (weighty = 0)
+   * @param calc a function that is called for each element of the given `heights` array, e.g. to decide whether to use the newly calculated row height or the existing one.
    */
-  protected _distributeHeight<T>(cons: LogicalGridData, distHeight: number, spanHeight: number, heights: number[], fixedHeights: boolean[], calc: (equalWidth: number, width: number) => number) {
+  protected _distributeHeight(cons: LogicalGridData, distHeight: number, heights: number[], fixedHeights: boolean[], calc: (equalWidth: number, width: number) => number) {
     let vSpan = cons.gridh;
-    let equalHeight = Math.floor((distHeight + spanHeight) / vSpan);
-    let remainder = (distHeight + spanHeight) % vSpan;
+    let equalHeight = Math.floor(distHeight / vSpan);
+    let remainder = distHeight % vSpan;
     let last = -1;
     for (let j = cons.gridy; j < cons.gridy + cons.gridh && j < this.rows; j++) {
       last = j;
@@ -382,11 +380,12 @@ export class LogicalGridLayoutInfo implements LogicalGridLayoutInfoModel {
           prefh = this.logicalHeightInPixel(cons);
         }
         prefh = Math.floor(prefh);
-        for (let j = cons.gridy; j < cons.gridy + cons.gridh && j < this.rows; j++) {
-          prefHeights[j] = Math.max(prefHeights[j], prefh);
-          maxHeights[j] = Math.min(maxHeights[j], cons.maxHeight);
+        let y = cons.gridy;
+        if (y < this.rows) {
+          prefHeights[y] = Math.max(prefHeights[y], prefh);
+          maxHeights[y] = Math.min(maxHeights[y], cons.maxHeight);
           if (cons.weighty === 0) {
-            fixedHeights[j] = true;
+            fixedHeights[y] = true;
           }
         }
       }
@@ -396,27 +395,26 @@ export class LogicalGridLayoutInfo implements LogicalGridLayoutInfoModel {
       let cons = this.gridDatas[i];
       if (cons.gridh > 1) {
         let vSpan = cons.gridh;
-        let spanHeight = [0, 0, 0];
-        let distHeight = [0, 0, 0];
+        let spanHeight = 0;
+        let distHeight;
         for (let j = cons.gridy; j < cons.gridy + cons.gridh && j < this.rows; j++) {
           if (!fixedHeights[j]) {
-            spanHeight[lc.PREF] += prefHeights[j];
-            spanHeight[lc.MAX] += maxHeights[j];
+            spanHeight += prefHeights[j];
           }
         }
         let vGaps = (vSpan - 1) * this.vgap;
         if (cons.heightHint > 0) {
-          distHeight[lc.PREF] = cons.heightHint - spanHeight[lc.PREF] - vGaps;
+          distHeight = cons.heightHint;
         } else if (cons.useUiHeight) {
-          distHeight[lc.PREF] = compSize[i].height - spanHeight[lc.PREF] - vGaps;
+          distHeight = compSize[i].height;
         } else {
-          distHeight[lc.PREF] = this.logicalHeightInPixel(cons) - spanHeight[lc.PREF] - vGaps;
+          distHeight = this.logicalHeightInPixel(cons);
         }
-        if (distHeight[lc.PREF] > 0) {
-          this._distributeHeight(cons, distHeight[lc.PREF], spanHeight[lc.PREF], prefHeights, fixedHeights, Math.max.bind(this));
+        distHeight -= vGaps;
+        if (distHeight > spanHeight) {
+          this._distributeHeight(cons, distHeight, prefHeights, fixedHeights, Math.max.bind(this));
         }
-        distHeight[lc.MAX] = cons.maxHeight - spanHeight[lc.MAX] - vGaps;
-        this._distributeHeight(cons, distHeight[lc.MAX], spanHeight[lc.MAX], maxHeights, fixedHeights, Math.min.bind(this));
+        this._distributeHeight(cons, cons.maxHeight - vGaps, maxHeights, fixedHeights, Math.min.bind(this));
       }
     }
 

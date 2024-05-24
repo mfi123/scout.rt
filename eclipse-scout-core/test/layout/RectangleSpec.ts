@@ -35,8 +35,7 @@ describe('Rectangle', () => {
 
     it('produces same results as java.awt.Rectangle', () => {
       let r = r1.union(r2);
-      let expected = new Rectangle(0, 0, 1361, 558);
-      expect(expected.equals(r)).toBe(true);
+      expect(r).toEqual(new Rectangle(0, 0, 1361, 558));
     });
   });
 

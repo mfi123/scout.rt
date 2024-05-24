@@ -10,7 +10,7 @@
 import {Dimension, InitModelOf, Insets, LogicalGridData, LogicalGridLayoutInfo, Rectangle} from '../../../src/index';
 
 describe('LogicalGridLayoutInfo', () => {
-  function $dummyComps(count: number) {
+  function $dummyComps(count: number): JQuery[] {
     let comps = [];
     for (let i = 0; i < count; i++) {
       comps.push($('<div>'));
@@ -38,7 +38,8 @@ describe('LogicalGridLayoutInfo', () => {
       if (i > 0) {
         x += widths[i - 1] + hgap;
       }
-      expect(row[i]).withContext(`cell ${i}`).toEqual(new Rectangle(x, rowNum * (height + vgap), widths[i], height));
+      let y = rowNum * (height + vgap);
+      expect(row[i]).withContext(`cell ${i}`).toEqual(new Rectangle(x, y, widths[i], height));
     }
   }
 
@@ -51,11 +52,15 @@ describe('LogicalGridLayoutInfo', () => {
       if (i > 0) {
         y += heights[i - 1] + vgap;
       }
-      expect(col[i]).withContext(`cell ${i}`).toEqual(new Rectangle(colNum * (width + hgap), y, width, heights[i]));
+      let x = colNum * (width + hgap);
+      expect(col[i]).withContext(`cell ${i}`).toEqual(new Rectangle(x, y, width, heights[i]));
     }
   }
 
-  function toCols(rows: Rectangle[][]) {
+  /**
+   * Transposes the given matrix (converts rows to columns).
+   */
+  function toCols(rows: Rectangle[][]): Rectangle[][] {
     let cols = [];
     for (let i = 0; i < rows.length; i++) {
       for (let j = 0; j < rows[i].length; j++) {
@@ -206,6 +211,30 @@ describe('LogicalGridLayoutInfo', () => {
         rows = newLogicalGridLayoutInfo([gd1, gd2, gd3]).layoutCellBounds(parentSize, parentInsets);
         expectWidths(rows, 0, [37, 38, 80, 37, 38], 30, 5, 5);
       });
+
+      it('respects absolute max width', () => {
+        let parentSize = new Dimension(50000, 400);
+        let gd1 = new LogicalGridData({gridx: 0, gridy: 0, gridw: 1, gridh: 1, weightx: 1, maxWidth: 40000});
+        let rows = newLogicalGridLayoutInfo([gd1]).layoutCellBounds(parentSize, parentInsets);
+        expectWidths(rows, 0, [10240], 30, 5, 5);
+
+        gd1 = new LogicalGridData({gridx: 0, gridy: 0, gridw: 2, gridh: 1, weightx: 1, maxWidth: 40000});
+        rows = newLogicalGridLayoutInfo([gd1]).layoutCellBounds(parentSize, parentInsets);
+        expectWidths(rows, 0, [10240, 10241], 30, 5, 5);
+
+        gd1 = new LogicalGridData({gridx: 0, gridy: 0, gridw: 1, gridh: 1, weightx: 1, maxWidth: 40000});
+        let gd2 = new LogicalGridData({gridx: 1, gridy: 0, gridw: 2, gridh: 1, weightx: 1, maxWidth: 40000});
+        rows = newLogicalGridLayoutInfo([gd1, gd2]).layoutCellBounds(parentSize, parentInsets);
+        expectWidths(rows, 0, [10240, 10240, 10241], 30, 5, 5);
+
+        // Two rows
+        gd1 = new LogicalGridData({gridx: 0, gridy: 0, gridw: 1, gridh: 1, weightx: 1, maxWidth: 40000});
+        gd2 = new LogicalGridData({gridx: 1, gridy: 0, gridw: 1, gridh: 1, weightx: 1, maxWidth: 40000});
+        let gd3 = new LogicalGridData({gridx: 0, gridy: 1, gridw: 2, gridh: 1, weightx: 1, maxWidth: 40000});
+        rows = newLogicalGridLayoutInfo([gd1, gd2, gd3]).layoutCellBounds(parentSize, parentInsets);
+        expectWidths(rows, 0, [10240, 10241], 30, 5, 5);
+        expectWidths(rows, 1, [10240, 10241], 30, 5, 5);
+      });
     });
 
     describe('maxHeight', () => {
@@ -316,6 +345,30 @@ describe('LogicalGridLayoutInfo', () => {
         gd3 = new LogicalGridData({gridx: 0, gridy: 3, gridw: 1, gridh: 2, weighty: 1, maxHeight: 80});
         cols = toCols(newLogicalGridLayoutInfo([gd1, gd2, gd3]).layoutCellBounds(parentSize, parentInsets));
         expectHeights(cols, 0, [37, 38, 80, 37, 38], 50, 5, 5);
+      });
+
+      it('respects absolute max height', () => {
+        let parentSize = new Dimension(400, 50000);
+        let gd1 = new LogicalGridData({gridx: 0, gridy: 0, gridw: 1, gridh: 1, weighty: 1, maxHeight: 40000});
+        let cols = toCols(newLogicalGridLayoutInfo([gd1]).layoutCellBounds(parentSize, parentInsets));
+        expectHeights(cols, 0, [10240], 50, 5, 5);
+
+        gd1 = new LogicalGridData({gridx: 0, gridy: 0, gridw: 1, gridh: 2, weighty: 1, maxHeight: 40000});
+        cols = toCols(newLogicalGridLayoutInfo([gd1]).layoutCellBounds(parentSize, parentInsets));
+        expectHeights(cols, 0, [10240, 10241], 50, 5, 5);
+
+        gd1 = new LogicalGridData({gridx: 0, gridy: 0, gridw: 1, gridh: 1, weighty: 1, maxHeight: 40000});
+        let gd2 = new LogicalGridData({gridx: 0, gridy: 1, gridw: 1, gridh: 2, weighty: 1, maxHeight: 40000});
+        cols = toCols(newLogicalGridLayoutInfo([gd1, gd2]).layoutCellBounds(parentSize, parentInsets));
+        expectHeights(cols, 0, [10240, 10240, 10241], 50, 5, 5);
+
+        // Two cols
+        gd1 = new LogicalGridData({gridx: 0, gridy: 0, gridw: 1, gridh: 1, weighty: 1, maxHeight: 40000});
+        gd2 = new LogicalGridData({gridx: 0, gridy: 1, gridw: 1, gridh: 1, weighty: 1, maxHeight: 40000});
+        let gd3 = new LogicalGridData({gridx: 1, gridy: 0, gridw: 1, gridh: 2, weighty: 1, maxHeight: 40000});
+        cols = toCols(newLogicalGridLayoutInfo([gd1, gd2, gd3]).layoutCellBounds(parentSize, parentInsets));
+        expectHeights(cols, 0, [10240, 10241], 50, 5, 5);
+        expectHeights(cols, 1, [10240, 10241], 50, 5, 5);
       });
     });
   });
