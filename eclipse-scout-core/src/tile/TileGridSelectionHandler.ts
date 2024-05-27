@@ -229,7 +229,7 @@ export class TileGridSelectionHandler {
 
   computeSelectionX(xDiff: number, extend: boolean): TileGridSelectionInstruction {
     let result = this._computeFocusedTileOrSelection(xDiff);
-    if (result.selectedTiles !== null) {
+    if (result.selectedTiles) {
       // New selection could be determined already -> return it;
       return result;
     }
@@ -252,7 +252,7 @@ export class TileGridSelectionHandler {
 
   computeSelectionY(yDiff: number, extend: boolean): TileGridSelectionInstruction {
     let result = this._computeFocusedTileOrSelection(yDiff);
-    if (result.selectedTiles !== null) {
+    if (result.selectedTiles) {
       // New selection could be determined already -> return it;
       return result;
     }
