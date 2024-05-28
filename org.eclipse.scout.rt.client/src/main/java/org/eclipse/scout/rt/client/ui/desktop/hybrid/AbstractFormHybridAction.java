@@ -58,19 +58,25 @@ public abstract class AbstractFormHybridAction<FORM extends IForm, DO_ENTITY ext
   protected void addFormListeners(FORM form) {
     form.addFormListener(e -> {
       if (FormEvent.TYPE_STORE_AFTER == e.getType()) {
-        DO_ENTITY result = exportResult(form);
-        if (result == null) {
-          result = createEmptyResult();
-        }
+        DO_ENTITY result = exportResultInternal(form);
         fireHybridWidgetEvent("save", result);
       }
       else if (FormEvent.TYPE_RESET_COMPLETE == e.getType()) {
-        fireHybridWidgetEvent("reset");
+        DO_ENTITY result = exportResultInternal(form);
+        fireHybridWidgetEvent("reset", result);
       }
       else if (FormEvent.TYPE_CLOSED == e.getType()) {
         fireHybridWidgetEvent("close");
       }
     });
+  }
+
+  protected DO_ENTITY exportResultInternal(FORM form) {
+    DO_ENTITY result = exportResult(form);
+    if (result == null) {
+      result = createEmptyResult();
+    }
+    return result;
   }
 
   protected void startForm(FORM form) {
