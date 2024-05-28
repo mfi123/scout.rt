@@ -63,7 +63,7 @@ export class Resizable implements ResizableModel, ObjectWithType {
     this._mouseDownHandler = this._onMouseDown.bind(this);
     this._mouseUpHandler = this._onMouseUp.bind(this);
     this._mousemoveHandler = this._onMousemove.bind(this);
-    this._resizeHandler = this._resize.bind(this);
+    this._resizeHandler = $.throttle(this._resize.bind(this), Resizable.FPS);
   }
 
   static MODES = {
@@ -74,10 +74,10 @@ export class Resizable implements ResizableModel, ObjectWithType {
   } as const;
 
   /**
-   * 15 fps seems to be a good value for slower browsers like firefox,
+   * 30 fps seems to be a good value for slower browsers like firefox,
    * where it takes longer to render.
    */
-  static FPS = 1000 / 15;
+  static FPS = 1000 / 30;
 
   setModes(modes?: ResizableMode[]) {
     let ensuredModes = modes || [Resizable.MODES.SOUTH, Resizable.MODES.EAST, Resizable.MODES.WEST, Resizable.MODES.NORTH];
@@ -279,7 +279,7 @@ export class Resizable implements ResizableModel, ObjectWithType {
   protected _onMousemove(event: MouseMoveEvent) {
     let newBounds = this._computeBounds(event);
     if (newBounds) {
-      $.throttle(this._resizeHandler, Resizable.FPS)(newBounds);
+      this._resizeHandler(newBounds);
     }
   }
 
@@ -305,6 +305,10 @@ export class Resizable implements ResizableModel, ObjectWithType {
   }
 
   protected _resize(newBounds: Rectangle) {
+    if (!this._context) {
+      // Resizing already finished
+      return;
+    }
     this._cropToBoundaries(newBounds);
     if (this._context.currentBounds.equals(newBounds)) {
       return;
