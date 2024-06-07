@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -53,8 +53,17 @@ export class WrappedFormField extends FormField implements WrappedFormFieldModel
     }
     if (innerForm) {
       innerForm.on('destroy', this._formDestroyHandler);
+      this._adaptForm(innerForm);
     }
     this._setProperty('innerForm', innerForm);
+  }
+
+  protected _adaptForm(form: Form) {
+    form.setShowOnOpen(false);
+    form.setDisplayHint(Form.DisplayHint.VIEW);
+    form.setModal(false);
+    form.setClosable(false); // Disable close key stroke
+    form.rootGroupBox?.setMenuBarPosition(GroupBox.MenuBarPosition.BOTTOM);
   }
 
   /**
@@ -65,21 +74,16 @@ export class WrappedFormField extends FormField implements WrappedFormFieldModel
       return;
     }
 
-    this.innerForm.setDisplayHint(Form.DisplayHint.VIEW); // by definition, an inner form is a view.
-    this.innerForm.setModal(false); // by definition, an inner form is not modal.
-    this.innerForm.setClosable(false); // Disable close key stroke
-    this.innerForm.renderInitialFocusEnabled = this.initialFocusEnabled; // do not render initial focus of form if disabled.
-    if (this.innerForm.rootGroupBox) {
-      this.innerForm.rootGroupBox.setMenuBarPosition(GroupBox.MenuBarPosition.BOTTOM);
-    }
-
+    this.innerForm.renderInitialFocusEnabled = this.initialFocusEnabled;
     this.innerForm.render();
 
     this.addField(this.innerForm.$container);
     this.innerForm.invalidateLayoutTree();
 
     // required because active element is lost when 'addField' is called.
-    this._renderInitialFocusEnabled();
+    if (this.initialFocusEnabled) {
+      this.innerForm.renderInitialFocus();
+    }
   }
 
   protected _removeInnerForm() {
@@ -94,9 +98,7 @@ export class WrappedFormField extends FormField implements WrappedFormFieldModel
     this._setInnerForm(null);
   }
 
-  protected _renderInitialFocusEnabled() {
-    if (this.innerForm && this.initialFocusEnabled) {
-      this.innerForm.renderInitialFocus();
-    }
+  setInitialFocusEnabled(initialFocusEnabled: boolean) {
+    this.setProperty('initialFocusEnabled', initialFocusEnabled);
   }
 }
