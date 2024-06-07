@@ -30,10 +30,12 @@ import org.eclipse.scout.rt.platform.cache.ICache;
 import org.eclipse.scout.rt.platform.cache.ICacheBuilder;
 import org.eclipse.scout.rt.platform.cache.ICacheEntryFilter;
 import org.eclipse.scout.rt.platform.cache.ICacheValueResolver;
+import org.eclipse.scout.rt.platform.context.RunContexts;
 import org.eclipse.scout.rt.platform.exception.ExceptionHandler;
 import org.eclipse.scout.rt.platform.exception.PlatformExceptionTranslator;
 import org.eclipse.scout.rt.platform.holders.Holder;
 import org.eclipse.scout.rt.platform.nls.NlsLocale;
+import org.eclipse.scout.rt.platform.transaction.TransactionScope;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.ObjectUtility;
 import org.eclipse.scout.rt.platform.util.event.FastListenerList;
@@ -93,17 +95,20 @@ public class CodeService implements ICodeService {
   }
 
   protected ICacheValueResolver<CodeTypeCacheKey, ICodeType<?, ?>> createCacheValueResolver() {
-    return key -> {
-      try {
-        return key.getCodeTypeClass().getConstructor().newInstance();
-      }
-      catch (ReflectiveOperationException e) {
-        throw BEANS.get(PlatformExceptionTranslator.class)
-            .translate(e)
-            .withContextInfo("key", key)
-            .withContextInfo("codeTypeClass", key.getCodeTypeClass());
-      }
-    };
+    return key -> RunContexts.copyCurrent(true)
+        .withLocale(key.getLocale())
+        .withTransactionScope(TransactionScope.REQUIRED)
+        .call(() -> {
+          try {
+            return key.getCodeTypeClass().getConstructor().newInstance();
+          }
+          catch (ReflectiveOperationException e) {
+            throw BEANS.get(PlatformExceptionTranslator.class)
+                .translate(e)
+                .withContextInfo("key", key)
+                .withContextInfo("codeTypeClass", key.getCodeTypeClass());
+          }
+        });
   }
 
   protected ICache<CodeTypeCacheKey, ICodeType<?, ?>> getCache() {
