@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -8,10 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 .messagebox {
+  --min-width: 200px;
   position: absolute;
   top: 0;
   left: 0;
-  min-width: 200px;
+  min-width: var(--min-width);
   max-width: @messagebox-max-width;
   #scout.popup-2();
   overflow: hidden;
@@ -236,6 +237,10 @@
   display: flex;
   justify-content: center;
   padding: 4px 26px 25px 26px;
+
+  &.measure {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: @messagebox-max-width) {

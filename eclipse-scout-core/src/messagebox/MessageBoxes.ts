@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ export class MessageBoxes implements MessageBoxesModel, ObjectWithType {
   iconId: string;
   closeOnClick: boolean;
   html: boolean;
+  cssClass: string;
 
   constructor() {
     this.parent = null;
@@ -88,12 +89,18 @@ export class MessageBoxes implements MessageBoxesModel, ObjectWithType {
     return this;
   }
 
+  withCssClass(cssClass: string): this {
+    this.cssClass = cssClass;
+    return this;
+  }
+
   build(): MessageBox {
     let options: InitModelOf<MessageBox> = {
       parent: this.parent,
       header: this.headerText,
       body: this.bodyText,
-      severity: this.severity
+      severity: this.severity,
+      cssClass: this.cssClass
     };
     if (strings.hasText(this.iconId)) {
       options.iconId = this.iconId;
@@ -111,6 +118,9 @@ export class MessageBoxes implements MessageBoxesModel, ObjectWithType {
     if (this.html) {
       options.html = options.body;
       delete options.body;
+    }
+    if (strings.hasText(this.cssClass)) {
+      options.cssClass = this.cssClass;
     }
     return scout.create(MessageBox, options);
   }

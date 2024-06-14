@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023 BSI Business Systems Integration AG
+ * Copyright (c) 2010, 2024 BSI Business Systems Integration AG
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,10 +19,19 @@ export class MessageBoxLayout extends AbstractLayout {
 
   override layout($container: JQuery) {
     let htmlComp = HtmlComponent.get($container),
-      windowSize = $container.windowSize(),
-      currentBounds = htmlComp.offsetBounds(true),
-      messageBoxSize = htmlComp.size(),
-      messageBoxMargins = htmlComp.margins();
+      windowSize = $container.windowSize();
+
+    this.messageBox.$container.css('max-width', Number.MAX_VALUE);
+    let buttonsSize = graphics.prefSize(this.messageBox.$buttons, {
+      exact: true
+    }); // TODO CGU what happens on small screens if there is not enough space?
+    this.messageBox.$container.css('max-width', '');
+    this.messageBox.$content.css('height', 'calc(100% - ' + buttonsSize.height + 'px)');
+    this.messageBox.$container.css('--min-width', buttonsSize.width + 'px');
+
+    let currentBounds = htmlComp.offsetBounds(true);
+    let messageBoxSize = htmlComp.size();
+    let messageBoxMargins = htmlComp.margins();
 
     messageBoxSize = DialogLayout.fitContainerInWindow(windowSize, currentBounds.point(), messageBoxSize, messageBoxMargins);
 
@@ -33,10 +42,6 @@ export class MessageBoxLayout extends AbstractLayout {
 
     graphics.setSize($container, messageBoxSize);
 
-    let buttonsSize = graphics.size(this.messageBox.$buttons, {
-      exact: true
-    });
-    this.messageBox.$content.css('height', 'calc(100% - ' + buttonsSize.height + 'px)');
     scrollbars.update(this.messageBox.$content);
 
     $container.cssPosition(DialogLayout.positionContainerInWindow($container));
